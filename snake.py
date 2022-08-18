@@ -4,6 +4,30 @@ import sys
 from pygame.math import Vector2
 
 
+class Snake:
+    def __init__(self):
+        self.body = [Vector2(5, 10), Vector2(6, 10), Vector2(7, 10)]
+        # move right
+        self.direction = Vector2(1, 0)
+
+    def draw_snake(self):
+        for block in self.body:
+            snake_rect = pygame.Rect(
+                block.x * cell_size,
+                block.y * cell_size,
+                cell_size, cell_size)
+            green_color = (51, 255, 0)
+            pygame.draw.rect(screen, green_color, snake_rect)
+
+    def move_snake(self):
+        # list with last item removed
+        body_copy = self.body[:-1]
+        self.body = body_copy
+        # create new head based off of direction that the user inputted
+        new_head = self.direction + self.body[0]
+        self.body.insert(0, new_head)
+
+
 class Food:
     def __init__(self):
         # randomize food location
@@ -49,21 +73,30 @@ cell_count = 20
 
 
 food = Food()
+snake = Snake()
+# create a custom event for screen updates
+screen_update = pygame.USEREVENT
+# custom screen update event triggers every 150 ms
+pygame.time.set_timer(screen_update, 150)
 while 1:
 
     for event in pygame.event.get():
+        if event.type == screen_update:
+            snake.move_snake()
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_d:  # right
-                blue_rect.right += 10
+                snake.direction = Vector2(1, 0)
             if event.key == pygame.K_a:  # left
-                blue_rect.left -= 10
+                snake.direction = Vector2(-1, 0)
             if event.key == pygame.K_w:  # up
-                blue_rect.top -= 10
+                snake.direction = Vector2(0, -1)
             if event.key == pygame.K_s:  # down
-                blue_rect.bottom += 10
+                snake.direction = Vector2(0, 1)
         # fill bg color before snake/food
         screen.fill(black_color)
         food.draw_food()
+        snake.draw_snake()
+
         # draw the elements
         screen.blit(blue_surface, blue_rect)
         # quit game
