@@ -34,16 +34,65 @@ class Snake:
         # come from top and turn left
         self.body_turn_UL = pygame.transform.rotate(self.body_turn_DL, 90)
         # come from top and turn right
-        self.body_turn_UR = pygame.transform.rotate(self.body_turn_left, 180)
+        self.body_turn_UR = pygame.transform.rotate(self.body_turn_DL, 180)
 
     def draw_snake(self):
-        for block in self.body:
+        self.update_head_image()
+        self.update_tail_image()
+
+        for index, block in enumerate(self.body):
             snake_rect = pygame.Rect(
                 block.x * cell_size,
                 block.y * cell_size,
                 cell_size, cell_size)
             yellow_color = (255, 255, 0)
-            pygame.draw.rect(screen, yellow_color, snake_rect)
+            #pygame.draw.rect(screen, yellow_color, snake_rect)
+            if index == 0:
+                screen.blit(self.head, snake_rect)
+            elif index == len(self.body)-1:
+                screen.blit(self.tail, snake_rect)
+            # no tail or head as neighbor
+            else:
+                prev_block = self.body[index - 1] - block
+                next_block = self.body[index + 1] - block
+                if prev_block.x == next_block.x:
+                    screen.blit(self.body_vertical, snake_rect)
+                elif prev_block.y == next_block.y:
+                    screen.blit(self.body_horizontal, snake_rect)
+                else:
+
+                    if prev_block.x == -1 and next_block.y == -1 or prev_block.y == -1 and next_block.x == -1:
+                        screen.blit(self.body_turn_DR, snake_rect)
+
+                    elif prev_block.x == -1 and next_block.y == 1 or prev_block.y == 1 and next_block.x == -1:
+                        screen.blit(self.body_turn_DL, snake_rect)
+
+                    elif prev_block.x == 1 and next_block.y == -1 or prev_block.y == -1 and next_block.x == 1:
+                        screen.blit(self.body_turn_UR, snake_rect)
+
+                    elif prev_block.x == 1 and next_block.y == 1 or prev_block.y == 1 and next_block.x == 1:
+                        screen.blit(self.body_turn_UL, snake_rect)
+
+    def update_head_image(self):
+        if self.direction == Vector2(-1, 0):
+            self.head = self.head_right
+        if self.direction == Vector2(1, 0):
+            self.head = self.head_left
+        if self.direction == Vector2(0, 1):
+            self.head = self.head_down
+        if self.direction == Vector2(0, -1):
+            self.head = self.head_up
+
+    def update_tail_image(self):
+        tail_diff = self.body[-2] - self.body[-1]
+        if tail_diff == Vector2(-1, 0):
+            self.tail = self.tail_right
+        if tail_diff == Vector2(1, 0):
+            self.tail = self.tail_left
+        if tail_diff == Vector2(0, -1):
+            self.tail = self.tail_down
+        if tail_diff == Vector2(0, 1):
+            self.tail = self.tail_up
 
     def move_snake(self):
         if not self.will_grow:
