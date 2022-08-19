@@ -4,28 +4,9 @@ import sys
 from pygame.math import Vector2
 
 
-class Main:
-    def __init__(self):
-        self.snake = Snake()
-        self.food = Food()
-
-    def draw_elements(self):
-        self.check_collision()
-        self.snake.draw_snake()
-        self.food.draw_food()
-
-    def update(self):
-        self.snake.move_snake()
-
-    def check_collision(self):
-        if self.snake.body[0] == self.food.pos:
-            self.snake.will_grow = True
-            self.food.move_food()
-
-
 class Snake:
     def __init__(self):
-        self.body = [Vector2(5, 10), Vector2(6, 10), Vector2(7, 10)]
+        self.body = [Vector2(7, 10), Vector2(6, 10), Vector2(5, 10)]
         # move right
         self.direction = Vector2(1, 0)
         self.will_grow = False
@@ -48,9 +29,6 @@ class Snake:
             new_head = self.direction + self.body[0]
             self.body.insert(0, new_head)
         else:
-            # list with last item removed
-            body_copy = self.body[:]
-            self.body = body_copy
             # create new head based off of direction that the user inputted
             new_head = self.direction + self.body[0]
             self.body.insert(0, new_head)
@@ -75,23 +53,55 @@ class Food:
         self.pos = Vector2(self.x, self.y)
 
 
+class Main:
+    def __init__(self):
+        self.snake = Snake()
+        self.food = Food()
+
+    def draw_elements(self):
+        self.snake.draw_snake()
+        self.food.draw_food()
+
+    def update(self):
+        self.snake.move_snake()
+        self.check_collision()
+        self.check_move()
+
+    def check_collision(self):
+        if self.snake.body[0] == self.food.pos:
+            self.snake.will_grow = True
+            self.food.move_food()
+
+    def check_move(self):
+        snake_head = self.snake.body[0]
+        if (snake_head.x < 0 or snake_head.x >= cell_count or
+                snake_head.y < 0 or snake_head.y >= cell_count):
+            self.game_over()
+        # check snake body (excluding the head)
+        for block in self.snake.body[1:]:
+            if snake_head == block:
+                self.game_over()
+
+    def game_over(self):
+        pygame.quit()
+        sys.exit()
+
+
 pygame.init()
+
+# cell width/height
+cell_size = 30
+# 20x20 grid
+cell_count = 20
 # screen
-screen_width, screen_height = 600, 600
+screen_width, screen_height = cell_count * cell_size, cell_count * cell_size
 screen = pygame.display.set_mode((screen_width, screen_height))
 black_color = pygame.color.Color('#000000')
 
 
 # track time
 clock = pygame.time.Clock()
-
-# create grid
-
-# cell width/height
-cell_size = 30
-# 20x20 grid
-cell_count = 20
-main = Main()
+main_game = Main()
 
 # create a custom event for screen updates
 screen_update = pygame.USEREVENT
@@ -101,23 +111,28 @@ while 1:
 
     for event in pygame.event.get():
         if event.type == screen_update:
-            main.snake.move_snake()
+            main_game.update()
         if event.type == pygame.KEYDOWN:
+
             if event.key == pygame.K_d:  # right
-                main.snake.direction = Vector2(1, 0)
+                if main_game.snake.direction.x != -1:
+                    main_game.snake.direction = Vector2(1, 0)
             if event.key == pygame.K_a:  # left
-                main.snake.direction = Vector2(-1, 0)
+                if main_game.snake.direction.x != 1:
+                    main_game.snake.direction = Vector2(-1, 0)
             if event.key == pygame.K_w:  # up
-                main.snake.direction = Vector2(0, -1)
+                if main_game.snake.direction.y != 1:
+                    main_game.snake.direction = Vector2(0, -1)
             if event.key == pygame.K_s:  # down
-                main.snake.direction = Vector2(0, 1)
+                if main_game.snake.direction.y != -1:
+                    main_game.snake.direction = Vector2(0, 1)
         # draw elements: board, snake, food
         screen.fill(black_color)
-        main.draw_elements()
+        main_game.draw_elements()
 
         # quit game
         if event.type == pygame.QUIT:
-            sys.exit()
+            main_game.game_over()
         pygame.display.update()
         # limit frame rate of game - 60 fps
         clock.tick(60)
