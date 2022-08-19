@@ -10,6 +10,31 @@ class Snake:
         # move right
         self.direction = Vector2(1, 0)
         self.will_grow = False
+        self.head_down = pygame.image.load(
+            'images/snake_head_D.png').convert_alpha()
+        self.head_up = pygame.transform.rotate(self.head_down, 180)
+        self.head_left = pygame.transform.rotate(self.head_down, 90)
+        self.head_right = pygame.transform.rotate(self.head_down, 270)
+
+        self.tail_down = pygame.image.load(
+            'images/snake_tail_U.png').convert_alpha()
+        self.tail_up = pygame.transform.rotate(self.tail_down, 180)
+        self.tail_left = pygame.transform.rotate(self.tail_down, 270)
+        self.tail_right = pygame.transform.rotate(self.tail_down, 90)
+
+        self.body_vertical = pygame.image.load(
+            'images/snake_body_UD.png').convert_alpha()
+        self.body_horizontal = pygame.transform.rotate(self.body_vertical, 90)
+
+        # come from bottom and turn left
+        self.body_turn_DL = pygame.image.load(
+            'images/snake_body_DL.png').convert_alpha()
+        # come from bottom and turn right
+        self.body_turn_DR = pygame.transform.rotate(self.body_turn_DL, 270)
+        # come from top and turn left
+        self.body_turn_UL = pygame.transform.rotate(self.body_turn_DL, 90)
+        # come from top and turn right
+        self.body_turn_UR = pygame.transform.rotate(self.body_turn_left, 180)
 
     def draw_snake(self):
         for block in self.body:
@@ -17,8 +42,8 @@ class Snake:
                 block.x * cell_size,
                 block.y * cell_size,
                 cell_size, cell_size)
-            green_color = (51, 255, 0)
-            pygame.draw.rect(screen, green_color, snake_rect)
+            yellow_color = (255, 255, 0)
+            pygame.draw.rect(screen, yellow_color, snake_rect)
 
     def move_snake(self):
         if not self.will_grow:
@@ -44,8 +69,9 @@ class Food:
         # create food rectangle
         food_rect = pygame.Rect(self.pos.x * cell_size,
                                 self.pos.y * cell_size, cell_size, cell_size)
-        white_color = (255, 255, 255)
-        pygame.draw.rect(screen, white_color, food_rect)
+        #white_color = (255, 255, 255)
+        #pygame.draw.rect(screen, white_color, food_rect)
+        screen.blit(food, food_rect)
 
     def move_food(self):
         self.x = random.randint(0, cell_count-1)
@@ -101,6 +127,9 @@ black_color = pygame.color.Color('#000000')
 
 # track time
 clock = pygame.time.Clock()
+
+food = pygame.image.load('images/food.png').convert_alpha()
+
 main_game = Main()
 
 # create a custom event for screen updates
