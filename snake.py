@@ -46,7 +46,7 @@ class Snake:
                 block.y * cell_size,
                 cell_size, cell_size)
             yellow_color = (255, 255, 0)
-            #pygame.draw.rect(screen, yellow_color, snake_rect)
+            # pygame.draw.rect(screen, yellow_color, snake_rect)
             if index == 0:
                 screen.blit(self.head, snake_rect)
             elif index == len(self.body)-1:
@@ -118,8 +118,8 @@ class Food:
         # create food rectangle
         food_rect = pygame.Rect(self.pos.x * cell_size,
                                 self.pos.y * cell_size, cell_size, cell_size)
-        #white_color = (255, 255, 255)
-        #pygame.draw.rect(screen, white_color, food_rect)
+        # white_color = (255, 255, 255)
+        # pygame.draw.rect(screen, white_color, food_rect)
         screen.blit(food, food_rect)
 
     def move_food(self):
@@ -134,6 +134,7 @@ class Main:
         self.food = Food()
 
     def draw_elements(self):
+        self.draw_board()
         self.snake.draw_snake()
         self.food.draw_food()
 
@@ -160,6 +161,22 @@ class Main:
     def game_over(self):
         pygame.quit()
         sys.exit()
+
+    def draw_board(self):
+        bg_color = (8, 13, 9)
+        for row in range(cell_count):
+            if row % 2 == 0:
+                for col in range(cell_count):
+                    if col % 2 == 0:
+                        bg_rect = pygame.Rect(
+                            col*cell_size, row*cell_size, cell_size, cell_size)
+                        pygame.draw.rect(screen, bg_color, bg_rect)
+            else:
+                for col in range(cell_count):
+                    if col % 2 != 0:
+                        bg_rect = pygame.Rect(
+                            col*cell_size, row*cell_size, cell_size, cell_size)
+                        pygame.draw.rect(screen, bg_color, bg_rect)
 
 
 pygame.init()
@@ -205,7 +222,8 @@ while 1:
                 if main_game.snake.direction.y != -1:
                     main_game.snake.direction = Vector2(0, 1)
         # draw elements: board, snake, food
-        screen.fill(black_color)
+        dark_blue = (73, 21, 3)
+        screen.fill((20, 20, 20))
         main_game.draw_elements()
 
         # quit game
