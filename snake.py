@@ -74,13 +74,14 @@ class Snake:
                         screen.blit(self.body_turn_UL, snake_rect)
 
     def update_head_image(self):
-        if self.direction == Vector2(-1, 0):
+        head_diff = self.body[0]-self.body[1]
+        if head_diff == Vector2(-1, 0):
             self.head = self.head_right
-        if self.direction == Vector2(1, 0):
+        if head_diff == Vector2(1, 0):
             self.head = self.head_left
-        if self.direction == Vector2(0, 1):
+        if head_diff == Vector2(0, 1):
             self.head = self.head_down
-        if self.direction == Vector2(0, -1):
+        if head_diff == Vector2(0, -1):
             self.head = self.head_up
 
     def update_tail_image(self):
@@ -137,6 +138,7 @@ class Main:
         self.draw_board()
         self.snake.draw_snake()
         self.food.draw_food()
+        self.draw_score()
 
     def update(self):
         self.snake.move_snake()
@@ -161,6 +163,11 @@ class Main:
     def game_over(self):
         pygame.quit()
         sys.exit()
+
+    def draw_score(self):
+        font = pygame.font.SysFont('monaco', 20)
+        name = font.render('SCORE', True, (255, 255, 255))
+        screen.blit(name, (450, 545))
 
     def draw_board(self):
         bg_color = (8, 13, 9)
@@ -189,7 +196,6 @@ cell_count = 20
 screen_width, screen_height = cell_count * cell_size, cell_count * cell_size
 screen = pygame.display.set_mode((screen_width, screen_height))
 black_color = pygame.color.Color('#000000')
-
 
 # track time
 clock = pygame.time.Clock()
