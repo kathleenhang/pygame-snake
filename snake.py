@@ -1,6 +1,7 @@
 import pygame
 import random
 import sys
+import shelve
 from pygame.math import Vector2
 
 
@@ -8,7 +9,7 @@ class Snake:
     def __init__(self):
         self.body = [Vector2(7, 10), Vector2(6, 10), Vector2(5, 10)]
         # move right
-        self.direction = Vector2(1, 0)
+        self.direction = Vector2(0, 0)
         self.will_grow = False
         self.head_down = pygame.image.load(
             'images/snake_head_D.png').convert_alpha()
@@ -35,6 +36,8 @@ class Snake:
         self.body_turn_UL = pygame.transform.rotate(self.body_turn_DL, 90)
         # come from top and turn right
         self.body_turn_UR = pygame.transform.rotate(self.body_turn_DL, 180)
+
+        self.eat_sound = pygame.mixer.Sound('sound/eat.mp3')
 
     def draw_snake(self):
         self.update_head_image()
@@ -96,6 +99,7 @@ class Snake:
             self.tail = self.tail_up
 
     def move_snake(self):
+
         if not self.will_grow:
             # list with last item removed
             body_copy = self.body[:-1]
@@ -109,6 +113,9 @@ class Snake:
             self.body.insert(0, new_head)
             self.will_grow = False
 
+    def play_eat_sound(self):
+        self.eat_sound.play()
+
 
 class Food:
     def __init__(self):
@@ -116,6 +123,7 @@ class Food:
         self.move_food()
 
     def draw_food(self):
+
         # create food rectangle
         food_rect = pygame.Rect(self.pos.x * cell_size,
                                 self.pos.y * cell_size, cell_size, cell_size)
@@ -139,6 +147,7 @@ class Main:
         self.snake.draw_snake()
         self.food.draw_food()
         self.draw_score()
+        # self.draw_last_score()
 
     def update(self):
         self.snake.move_snake()
@@ -149,6 +158,10 @@ class Main:
         if self.snake.body[0] == self.food.pos:
             self.snake.will_grow = True
             self.food.move_food()
+            self.snake.play_eat_sound()
+        for block in self.snake.body[1:]:
+            if block == self.food.pos:
+                self.food.move_food()
 
     def check_move(self):
         snake_head = self.snake.body[0]
@@ -161,13 +174,36 @@ class Main:
                 self.game_over()
 
     def game_over(self):
-        pygame.quit()
-        sys.exit()
+        score = len(self.snake.body)-3
+        # if score > high_score:
+        #  high_score = score
+        # d = shelve.open('score.txt')
+        # d['score'] = score
+        # d.close()
+
+        self.snake.body = [Vector2(7, 10), Vector2(6, 10), Vector2(5, 10)]
+        self.snake.direction = Vector2(0, 0)
+        # show their last score
+        # show high score
+
+        # pygame.quit()
+        # sys.exit()
+    def draw_last_score(self):
+        font = pygame.font.SysFont('monaco', 20, bold=True)
+        font2 = pygame.font.SysFont('monaco', 20, bold=False)
+        lbl = font.render('LAST SCORE: ', True, (255, 255, 255))
+        score = font2.render(str(last_score).zfill(3), True, (255, 255, 255))
+        screen.blit(lbl, (350, 445))
+        screen.blit(score, (550, 445))
 
     def draw_score(self):
-        font = pygame.font.SysFont('monaco', 20)
-        name = font.render('SCORE', True, (255, 255, 255))
-        screen.blit(name, (450, 545))
+        font = pygame.font.SysFont('monaco', 20, bold=True)
+        font2 = pygame.font.SysFont('monaco', 20, bold=False)
+        lbl = font.render('SCORE: ', True, (255, 255, 255))
+        score = font2.render(str(len(self.snake.body) -
+                                 3).zfill(3), True, (255, 255, 255))
+        screen.blit(lbl, (450, 545))
+        screen.blit(score, (550, 545))
 
     def draw_board(self):
         bg_color = (8, 13, 9)
@@ -204,6 +240,7 @@ food = pygame.image.load('images/food.png').convert_alpha()
 
 main_game = Main()
 
+
 # create a custom event for screen updates
 screen_update = pygame.USEREVENT
 # custom screen update event triggers every 150 ms
@@ -235,6 +272,8 @@ while 1:
         # quit game
         if event.type == pygame.QUIT:
             main_game.game_over()
+            pygame.quit()
+            sys.exit()
         pygame.display.update()
         # limit frame rate of game - 60 fps
         clock.tick(60)
